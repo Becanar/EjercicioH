@@ -33,10 +33,6 @@ public class tablaController {
     @FXML
     private Button btModificar;
     @FXML
-    private Button btExportar;
-    @FXML
-    private Button btImportar;
-    @FXML
     private HBox contenedorBuscadorBotones;
     @FXML
     private Label lblBuscador;
@@ -340,92 +336,4 @@ public class tablaController {
         modal.close();
     }
 
-    /**
-     * Exporta los datos de las personas a un archivo CSV.
-     * @param actionEvent Evento de acción.
-     */
-    public void exportar(ActionEvent actionEvent) {
-        FileChooser fileChooser = new FileChooser();
-        fileChooser.getExtensionFilters().add(new FileChooser.ExtensionFilter("CSV Files", "*.csv"));
-        fileChooser.setInitialDirectory(new File(System.getProperty("user.dir")));
-        File file = fileChooser.showSaveDialog(btExportar.getScene().getWindow());
-
-        if (file != null) {
-            try (BufferedWriter bw = new BufferedWriter(new FileWriter(file))) {
-                bw.write("Nombre,Apellidos,Edad\n");
-                for (Persona persona : personas) {
-                    bw.write(String.format("%s,%s,%d\n", persona.getNombre(), persona.getApellidos(), persona.getEdad()));
-                }
-                Alert alert = new Alert(Alert.AlertType.INFORMATION);
-                alert.setHeaderText(null);
-                alert.setTitle("Exportado correctamente");
-                alert.setContentText("Datos exportados correctamente.");
-                alert.showAndWait();
-            } catch (IOException e) {
-                ArrayList<String> errores = new ArrayList<>();
-                errores.add("No se ha podido exportar.");
-                mostrarAlertError(errores);
-            }
-        }
-    }
-
-    /**
-     * Importa los datos de las personas desde un archivo CSV.
-     * @param actionEvent Evento de acción.
-     */
-    public void importar(ActionEvent actionEvent) {
-        FileChooser fileChooser = new FileChooser();
-        fileChooser.getExtensionFilters().add(new FileChooser.ExtensionFilter("CSV Files", "*.csv"));
-        fileChooser.setInitialDirectory(new File(System.getProperty("user.dir")));
-        File file = fileChooser.showOpenDialog(btImportar.getScene().getWindow());
-
-        if (file != null) {
-            try (BufferedReader br = new BufferedReader(new FileReader(file))) {
-                String line;
-                br.readLine();
-                ArrayList<String> errores = new ArrayList<>();
-
-                while ((line = br.readLine()) != null) {
-                    String[] partes = line.split(",");
-                    if (partes.length != 3) {
-                        errores.add("Error en la línea: " + line + ". No tiene  3 campos.");
-                        continue;
-                    }
-
-                    String nombre = partes[0].trim();
-                    String apellidos = partes[1].trim();
-                    int edad;
-
-                    try {
-                        edad = Integer.parseInt(partes[2].trim());
-                    } catch (NumberFormatException e) {
-                        errores.add("Error en la línea: " + line + ". La edad tiene que ser numérica.");
-                        continue;
-                    }
-
-                    Persona nuevaPersona = new Persona(nombre, apellidos, edad);
-                    boolean existe = personas.contains(nuevaPersona);
-
-                    if (!existe) {
-                        personas.add(nuevaPersona);
-                    }
-                }
-
-                if (!errores.isEmpty()) {
-                    mostrarAlertError(errores);
-                } else {
-                    Alert alert = new Alert(Alert.AlertType.INFORMATION);
-                    alert.setHeaderText(null);
-                    alert.setTitle("Importado Correctamente");
-                    alert.setContentText("Datos importados correctamente.");
-                    alert.showAndWait();
-                }
-
-            } catch (IOException e) {
-                ArrayList<String> errores = new ArrayList<>();
-                errores.add("Error al importar.");
-                mostrarAlertError(errores);
-            }
-        }
-    }
 }

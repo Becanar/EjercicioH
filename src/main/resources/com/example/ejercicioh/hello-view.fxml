@@ -9,7 +9,7 @@
 <?import javafx.scene.layout.HBox?>
 <?import javafx.scene.layout.VBox?>
 
-<VBox fx:id="rootPane" maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="400.0" prefWidth="600.0" xmlns="http://javafx.com/javafx/23" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.example.ejerciciof.app.tablaController">
+<VBox fx:id="rootPane" maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="400.0" prefWidth="600.0" xmlns="http://javafx.com/javafx/23" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.example.ejercicioh.app.tablaController">
    <children>
       <HBox fx:id="contenedorBuscadorBotones" prefHeight="100.0" prefWidth="200.0">
          <children>
@@ -23,16 +23,6 @@
                   <Insets left="5.0" top="10.0" />
                </HBox.margin>
             </TextField>
-            <Button fx:id="btExportar" mnemonicParsing="false" onAction="#exportar" text="Exportar">
-               <HBox.margin>
-                  <Insets left="150.0" top="10.0" />
-               </HBox.margin>
-            </Button>
-            <Button fx:id="btImportar" mnemonicParsing="false" onAction="#importar" text="Importar">
-               <HBox.margin>
-                  <Insets left="30.0" top="10.0" />
-               </HBox.margin>
-            </Button>
          </children>
       </HBox>
       <TableView fx:id="tablaVista" prefHeight="344.0" prefWidth="439.0">
