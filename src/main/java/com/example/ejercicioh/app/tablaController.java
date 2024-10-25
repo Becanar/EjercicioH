@@ -1,5 +1,7 @@
 package com.example.ejercicioh.app;
 
+import com.example.ejercicioh.dao.PersonaDao;
+import com.example.ejercicioh.model.Persona;
 import javafx.beans.property.ReadOnlyObjectWrapper;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
@@ -10,20 +12,12 @@ import javafx.geometry.Insets;
 import javafx.geometry.Pos;
 import javafx.scene.Scene;
 import javafx.scene.control.*;
-import javafx.scene.image.Image;
 import javafx.scene.layout.*;
-import javafx.stage.FileChooser;
 import javafx.stage.Modality;
 import javafx.stage.Stage;
-import com.example.ejercicioh.model.Persona;
 
-import java.io.*;
 import java.util.ArrayList;
 
-/**
- * Controlador para la gestión de una tabla que contiene información de personas. Permite agregar, modificarPersona, eliminarPersona,
- * importar y exportar datos de personas en formato CSV.
- */
 public class tablaController {
 
     @FXML
@@ -33,10 +27,6 @@ public class tablaController {
     @FXML
     private Button btModificar;
     @FXML
-    private HBox contenedorBuscadorBotones;
-    @FXML
-    private Label lblBuscador;
-    @FXML
     private TextField txtBuscar;
     @FXML
     private TableColumn<Persona, String> columnaApellidos;
@@ -45,11 +35,7 @@ public class tablaController {
     @FXML
     private TableColumn<Persona, String> columnaNombre;
     @FXML
-    private VBox rootPane;
-    @FXML
     private TableView<Persona> tablaVista;
-    @FXML
-    private HBox contenedorBotones;
 
     private ObservableList<Persona> personas = FXCollections.observableArrayList();
     private FilteredList<Persona> filtro;
@@ -61,28 +47,18 @@ public class tablaController {
     private Button btnCancelar;
     private Stage modal;
 
-    /**
-     * Inicializa la tabla, configurando los valores para las columnas y activando el filtrado de datos
-     * a partir del campo de búsqueda.
-     */
     public void initialize() {
         columnaNombre.setCellValueFactory(cellData -> new ReadOnlyObjectWrapper<>(cellData.getValue().getNombre()));
         columnaApellidos.setCellValueFactory(cellData -> new ReadOnlyObjectWrapper<>(cellData.getValue().getApellidos()));
         columnaEdad.setCellValueFactory(cellData -> new ReadOnlyObjectWrapper<>(cellData.getValue().getEdad()));
 
-        personas = FXCollections.observableArrayList();
+        personas = PersonaDao.cargarPersonas(); // Carga inicial desde la base de datos
         filtro = new FilteredList<>(personas);
         tablaVista.setItems(filtro);
 
-        txtBuscar.textProperty().addListener((observable, oldValue, newValue) -> {
-            filtrar(null);
-        });
+        txtBuscar.textProperty().addListener((observable, oldValue, newValue) -> filtrar(null));
     }
 
-    /**
-     * Método que muestra una ventana emergente para agregar una nueva persona a la tabla.
-     * @param event Evento de acción.
-     */
     @FXML
     void agregarPersona(ActionEvent event) {
         mostrarVentanaDatos((Stage) btAgregar.getScene().getWindow(), false);
@@ -94,20 +70,9 @@ public class tablaController {
         btnCancelar.setOnAction(actionEvent -> cancelar());
     }
 
-    /**
-     * Muestra una ventana modal para agregar o modificarPersona datos de una persona.
-     * @param ventanaPrincipal La ventana principal desde donde se abre el modal.
-     * @param esModif Booleano que indica si se trata de una modificación (true) o un nuevo registro (false).
-     */
     public void mostrarVentanaDatos(Stage ventanaPrincipal, boolean esModif) {
         modal = new Stage();
         modal.setResizable(false);
-        try {
-            Image img = new Image(getClass().getResource("/com/example/ejercicioh/agenda.png").toString());
-            modal.getIcons().add(img);
-        } catch (Exception e) {
-            System.out.println("Error al cargar la imagen: " + e.getMessage());
-        }
         modal.initOwner(ventanaPrincipal);
         modal.initModality(Modality.WINDOW_MODAL);
 
@@ -145,46 +110,31 @@ public class tablaController {
         modal.show();
     }
 
-    /**
-     * Guarda una nueva persona o modifica la existente según el modo de operación.
-     * @param esModificar Indica si se está modificando una persona existente (true) o agregando una nueva (false).
-     */
     public void guardar(boolean esModificar) {
         if (valido()) {
             String nombre = txtNombre.getText();
             String apellidos = txtApellidos.getText();
             int edad = Integer.parseInt(txtEdad.getText());
 
-            Persona nuevaPersona = new Persona(nombre, apellidos, edad);
-
-            boolean existe = false;
-            for (Persona persona : personas) {
-                if (persona.equals(nuevaPersona)) {
-                    if (esModificar && persona.equals(tablaVista.getSelectionModel().getSelectedItem())) {
-                        continue;
-                    }
-                    existe = true;
-                    break;
-                }
-            }
-
-            if (existe) {
-                ArrayList<String> errores = new ArrayList<>();
-                errores.add("La persona ya existe.");
-                mostrarAlertError(errores);
-                return;
-            }
-
+            Persona nuevaPersona = new Persona(nombre, apellidos, edad); // Crear nueva persona sin ID
             if (esModificar) {
                 Persona personaSeleccionada = tablaVista.getSelectionModel().getSelectedItem();
-                int index = personas.indexOf(personaSeleccionada);
-                if (index >= 0) {
-                    personas.set(index, nuevaPersona);
-                    mostrarVentanaModificado();
+                Persona personaModificada = new Persona(personaSeleccionada.getId(), nombre, apellidos, edad);
+
+                if (PersonaDao.modificarPersona(personaSeleccionada, personaModificada)) {
+                    int index = personas.indexOf(personaSeleccionada);
+                    if (index >= 0) {
+                        personas.set(index, personaModificada);
+                        mostrarVentanaModificado();
+                    }
                 }
             } else {
-                personas.add(nuevaPersona);
-                mostrarVentanaAgregado();
+                int idGenerado = PersonaDao.insertarPersona(nuevaPersona);
+                if (idGenerado != -1) {
+                    nuevaPersona.setId(idGenerado); // Asignar el ID generado
+                    personas.add(nuevaPersona); // Agregar a la lista
+                    mostrarVentanaAgregado();
+                }
             }
 
             modal.close();
@@ -193,10 +143,6 @@ public class tablaController {
         }
     }
 
-    /**
-     * Valida los campos del formulario de persona para verificar que los datos son correctos.
-     * @return true si todos los datos son válidos; de lo contrario, false.
-     */
     private boolean valido() {
         boolean error = false;
         ArrayList<String> errores = new ArrayList<>();
@@ -221,10 +167,6 @@ public class tablaController {
         return true;
     }
 
-    /**
-     * Elimina la persona seleccionada en la tabla.
-     * @param event Evento de acción.
-     */
     @FXML
     void eliminar(ActionEvent event) {
         Persona p = tablaVista.getSelectionModel().getSelectedItem();
@@ -233,18 +175,16 @@ public class tablaController {
             lst.add("No has seleccionado ninguna persona.");
             mostrarAlertError(lst);
         } else {
-            personas.remove(p);
-            filtro.setPredicate(null);
-            mostrarVentanaEliminado();
-            tablaVista.getSelectionModel().clearSelection();
-            txtBuscar.setText("");
+            if (PersonaDao.eliminarPersona(p)) {
+                personas.remove(p);
+                filtro.setPredicate(null);
+                mostrarVentanaEliminado();
+                tablaVista.getSelectionModel().clearSelection();
+                txtBuscar.setText("");
+            }
         }
     }
 
-    /**
-     * Modifica los datos de la persona seleccionada en la tabla.
-     * @param event Evento de acción.
-     */
     @FXML
     void modificar(ActionEvent event) {
         Persona p = tablaVista.getSelectionModel().getSelectedItem();
@@ -262,10 +202,6 @@ public class tablaController {
         }
     }
 
-    /**
-     * Filtra las personas de la tabla basándose en el texto ingresado en el campo de búsqueda.
-     * @param event Evento de acción.
-     */
     @FXML
     void filtrar(ActionEvent event) {
         if (txtBuscar.getText().isEmpty()) {
@@ -279,10 +215,6 @@ public class tablaController {
         }
     }
 
-    /**
-     * Muestra una alerta con los mensajes de error especificados.
-     * @param lst Lista de mensajes de error.
-     */
     private void mostrarAlertError(ArrayList<String> lst) {
         Alert alert = new Alert(Alert.AlertType.ERROR);
         alert.initOwner(btAgregar.getScene().getWindow());
@@ -293,9 +225,6 @@ public class tablaController {
         alert.showAndWait();
     }
 
-    /**
-     * Muestra una alerta indicando que una persona ha sido agregada correctamente.
-     */
     private void mostrarVentanaAgregado() {
         Alert alerta = new Alert(Alert.AlertType.INFORMATION);
         alerta.initOwner(btAgregar.getScene().getWindow());
@@ -305,9 +234,6 @@ public class tablaController {
         alerta.showAndWait();
     }
 
-    /**
-     * Muestra una alerta indicando que una persona ha sido modificada correctamente.
-     */
     private void mostrarVentanaModificado() {
         Alert alerta = new Alert(Alert.AlertType.INFORMATION);
         alerta.initOwner(btAgregar.getScene().getWindow());
@@ -317,9 +243,6 @@ public class tablaController {
         alerta.showAndWait();
     }
 
-    /**
-     * Muestra una alerta indicando que una persona ha sido eliminada correctamente.
-     */
     private void mostrarVentanaEliminado() {
         Alert alerta = new Alert(Alert.AlertType.INFORMATION);
         alerta.initOwner(btAgregar.getScene().getWindow());
@@ -329,11 +252,7 @@ public class tablaController {
         alerta.showAndWait();
     }
 
-    /**
-     * Cierra la ventana modal actual.
-     */
-    public void cancelar() {
+    private void cancelar() {
         modal.close();
     }
-
 }

@@ -14,11 +14,24 @@ public class Persona {
      * Constructor de la clase Persona.
      *
      * @param nombre    El nombre de la persona.
+     * @param id    El id de la persona.
      * @param apellidos Los apellidos de la persona.
      * @param edad      La edad de la persona.
      */
     public Persona(int id,String nombre, String apellidos, int edad) {
         this.id=id;
+        this.nombre = nombre;
+        this.apellidos = apellidos;
+        this.edad = edad;
+    }
+    /**
+     * Constructor de la clase Persona.
+     *
+     * @param nombre    El nombre de la persona.
+     * @param apellidos Los apellidos de la persona.
+     * @param edad      La edad de la persona.
+     */
+    public Persona(String nombre, String apellidos, int edad) {
         this.nombre = nombre;
         this.apellidos = apellidos;
         this.edad = edad;
