@@ -18,35 +18,44 @@ import javafx.stage.Stage;
 
 import java.util.ArrayList;
 
+/**
+ * Controlador para la tabla de personas en la interfaz gráfica.
+ * Maneja las operaciones CRUD (Crear, Leer, Actualizar, Eliminar)
+ * y la interacción con la tabla de personas.
+ */
 public class tablaController {
 
     @FXML
-    private Button btAgregar;
+    private Button btAgregar; ///< Botón para agregar una nueva persona.
     @FXML
-    private Button btEliminar;
+    private Button btEliminar; ///< Botón para eliminar una persona seleccionada.
     @FXML
-    private Button btModificar;
+    private Button btModificar; ///< Botón para modificar una persona seleccionada.
     @FXML
-    private TextField txtBuscar;
+    private TextField txtBuscar; ///< Campo de texto para buscar personas.
     @FXML
-    private TableColumn<Persona, String> columnaApellidos;
+    private TableColumn<Persona, String> columnaApellidos; ///< Columna para los apellidos de las personas.
     @FXML
-    private TableColumn<Persona, Integer> columnaEdad;
+    private TableColumn<Persona, Integer> columnaEdad; ///< Columna para la edad de las personas.
     @FXML
-    private TableColumn<Persona, String> columnaNombre;
+    private TableColumn<Persona, String> columnaNombre; ///< Columna para los nombres de las personas.
     @FXML
-    private TableView<Persona> tablaVista;
+    private TableView<Persona> tablaVista; ///< Tabla que muestra la lista de personas.
 
-    private ObservableList<Persona> personas = FXCollections.observableArrayList();
-    private FilteredList<Persona> filtro;
+    private ObservableList<Persona> personas = FXCollections.observableArrayList(); ///< Lista observable de personas.
+    private FilteredList<Persona> filtro; ///< Lista filtrada para la búsqueda de personas.
 
-    private TextField txtNombre;
-    private TextField txtApellidos;
-    private TextField txtEdad;
-    private Button btnGuardar;
-    private Button btnCancelar;
-    private Stage modal;
+    private TextField txtNombre; ///< Campo de texto para el nombre de la persona.
+    private TextField txtApellidos; ///< Campo de texto para los apellidos de la persona.
+    private TextField txtEdad; ///< Campo de texto para la edad de la persona.
+    private Button btnGuardar; ///< Botón para guardar los cambios.
+    private Button btnCancelar; ///< Botón para cancelar la operación.
+    private Stage modal; ///< Ventana modal para ingresar datos de la persona.
 
+    /**
+     * Inicializa la tabla y configura las columnas.
+     * Carga la lista de personas desde la base de datos.
+     */
     public void initialize() {
         columnaNombre.setCellValueFactory(cellData -> new ReadOnlyObjectWrapper<>(cellData.getValue().getNombre()));
         columnaApellidos.setCellValueFactory(cellData -> new ReadOnlyObjectWrapper<>(cellData.getValue().getApellidos()));
@@ -59,6 +68,12 @@ public class tablaController {
         txtBuscar.textProperty().addListener((observable, oldValue, newValue) -> filtrar(null));
     }
 
+    /**
+     * Maneja la acción de agregar una nueva persona.
+     * Muestra la ventana modal para ingresar datos.
+     *
+     * @param event El evento de acción.
+     */
     @FXML
     void agregarPersona(ActionEvent event) {
         mostrarVentanaDatos((Stage) btAgregar.getScene().getWindow(), false);
@@ -70,6 +85,12 @@ public class tablaController {
         btnCancelar.setOnAction(actionEvent -> cancelar());
     }
 
+    /**
+     * Muestra una ventana modal para ingresar o modificar los datos de una persona.
+     *
+     * @param ventanaPrincipal La ventana principal desde donde se abre el modal.
+     * @param esModif Indica si es una modificación (true) o una nueva entrada (false).
+     */
     public void mostrarVentanaDatos(Stage ventanaPrincipal, boolean esModif) {
         modal = new Stage();
         modal.setResizable(false);
@@ -110,6 +131,11 @@ public class tablaController {
         modal.show();
     }
 
+    /**
+     * Guarda la nueva persona o modifica una existente.
+     *
+     * @param esModificar Indica si se está modificando (true) o agregando (false).
+     */
     public void guardar(boolean esModificar) {
         if (valido()) {
             String nombre = txtNombre.getText();
@@ -161,6 +187,11 @@ public class tablaController {
         }
     }
 
+    /**
+     * Valida los campos de entrada antes de guardar.
+     *
+     * @return true si los campos son válidos, false en caso contrario.
+     */
     private boolean valido() {
         boolean error = false;
         ArrayList<String> errores = new ArrayList<>();
@@ -185,6 +216,11 @@ public class tablaController {
         return true;
     }
 
+    /**
+     * Elimina la persona seleccionada de la tabla.
+     *
+     * @param event El evento de acción.
+     */
     @FXML
     void eliminar(ActionEvent event) {
         Persona p = tablaVista.getSelectionModel().getSelectedItem();
@@ -203,6 +239,11 @@ public class tablaController {
         }
     }
 
+    /**
+     * Modifica la persona seleccionada.
+     *
+     * @param event El evento de acción.
+     */
     @FXML
     void modificar(ActionEvent event) {
         Persona p = tablaVista.getSelectionModel().getSelectedItem();
@@ -220,6 +261,11 @@ public class tablaController {
         }
     }
 
+    /**
+     * Filtra la lista de personas según el texto ingresado en el campo de búsqueda.
+     *
+     * @param event El evento de acción.
+     */
     @FXML
     void filtrar(ActionEvent event) {
         if (txtBuscar.getText().isEmpty()) {
@@ -233,6 +279,11 @@ public class tablaController {
         }
     }
 
+    /**
+     * Muestra un mensaje de error en un cuadro de diálogo.
+     *
+     * @param lst Lista de mensajes de error a mostrar.
+     */
     private void mostrarAlertError(ArrayList<String> lst) {
         Alert alert = new Alert(Alert.AlertType.ERROR);
         alert.initOwner(btAgregar.getScene().getWindow());
@@ -243,6 +294,9 @@ public class tablaController {
         alert.showAndWait();
     }
 
+    /**
+     * Muestra un mensaje informando que una persona fue agregada correctamente.
+     */
     private void mostrarVentanaAgregado() {
         Alert alerta = new Alert(Alert.AlertType.INFORMATION);
         alerta.initOwner(btAgregar.getScene().getWindow());
@@ -252,6 +306,9 @@ public class tablaController {
         alerta.showAndWait();
     }
 
+    /**
+     * Muestra un mensaje informando que una persona fue modificada correctamente.
+     */
     private void mostrarVentanaModificado() {
         Alert alerta = new Alert(Alert.AlertType.INFORMATION);
         alerta.initOwner(btAgregar.getScene().getWindow());
@@ -261,6 +318,9 @@ public class tablaController {
         alerta.showAndWait();
     }
 
+    /**
+     * Muestra un mensaje informando que una persona fue eliminada correctamente.
+     */
     private void mostrarVentanaEliminado() {
         Alert alerta = new Alert(Alert.AlertType.INFORMATION);
         alerta.initOwner(btAgregar.getScene().getWindow());
@@ -270,6 +330,9 @@ public class tablaController {
         alerta.showAndWait();
     }
 
+    /**
+     * Cierra la ventana modal actual.
+     */
     private void cancelar() {
         modal.close();
     }

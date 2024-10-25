@@ -9,15 +9,24 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 
+/**
+ * Clase de acceso a datos para la entidad Persona.
+ * Proporciona métodos para realizar operaciones CRUD en la base de datos.
+ */
 public class PersonaDao {
 
+    /**
+     * Carga todas las personas de la base de datos.
+     *
+     * @return Una lista observable de personas.
+     */
     public static ObservableList<Persona> cargarPersonas() {
         ConectorDB cn;
         ObservableList<Persona> lst = FXCollections.observableArrayList();
-        try{
+        try {
             cn = new ConectorDB();
 
-            String consulta = "SELECT id,nombre,apellidos,edad FROM Persona";
+            String consulta = "SELECT id, nombre, apellidos, edad FROM Persona";
             PreparedStatement ps = cn.getConnection().prepareStatement(consulta);
             ResultSet rs = ps.executeQuery();
             while (rs.next()) {
@@ -25,19 +34,24 @@ public class PersonaDao {
                 String nombre = rs.getString("nombre");
                 String apellidos = rs.getString("apellidos");
                 int edad = rs.getInt("edad");
-                Persona p = new Persona(id,nombre,apellidos,edad);
+                Persona p = new Persona(id, nombre, apellidos, edad);
                 lst.add(p);
-
             }
             rs.close();
             cn.closeConexion();
-        }catch (
-                SQLException e) {
+        } catch (SQLException e) {
             System.out.println(e.getMessage());
         }
         return lst;
     }
 
+    /**
+     * Modifica una persona en la base de datos.
+     *
+     * @param p  La persona existente que se va a modificar.
+     * @param pN La nueva persona con los datos actualizados.
+     * @return true si la modificación fue exitosa, false de lo contrario.
+     */
     public static boolean modificarPersona(Persona p, Persona pN) {
         ConectorDB cn;
         PreparedStatement ps;
@@ -45,7 +59,7 @@ public class PersonaDao {
         try {
             cn = new ConectorDB();
 
-            String consulta = "UPDATE Persona SET nombre = ?,apellidos = ?,edad = ? WHERE id = ?";
+            String consulta = "UPDATE Persona SET nombre = ?, apellidos = ?, edad = ? WHERE id = ?";
             ps = cn.getConnection().prepareStatement(consulta);
 
             ps.setString(1, pN.getNombre());
@@ -59,18 +73,22 @@ public class PersonaDao {
         } catch (SQLException e) {
             System.out.println(e.getMessage());
             return false;
-
         }
-
     }
 
-    public  static int insertarPersona(Persona p) {
+    /**
+     * Inserta una nueva persona en la base de datos.
+     *
+     * @param p La persona a insertar.
+     * @return El ID generado de la nueva persona o -1 si la inserción falla.
+     */
+    public static int insertarPersona(Persona p) {
         ConectorDB cn;
         PreparedStatement ps;
 
         try {
             cn = new ConectorDB();
-            String sql = "INSERT INTO Persona (nombre,apellidos,edad) VALUES (?,?,?) ";
+            String sql = "INSERT INTO Persona (nombre, apellidos, edad) VALUES (?, ?, ?)";
             ps = cn.getConnection().prepareStatement(sql, PreparedStatement.RETURN_GENERATED_KEYS);
             ps.setString(1, p.getNombre());
             ps.setString(2, p.getApellidos());
@@ -92,13 +110,16 @@ public class PersonaDao {
         } catch (SQLException e) {
             System.out.println(e.getMessage());
             return -1;
-
         }
-
     }
 
-    public  static boolean eliminarPersona(Persona p){
-
+    /**
+     * Elimina una persona de la base de datos.
+     *
+     * @param p La persona que se va a eliminar.
+     * @return true si la eliminación fue exitosa, false de lo contrario.
+     */
+    public static boolean eliminarPersona(Persona p) {
         ConectorDB cn;
         PreparedStatement ps;
         try {
@@ -110,11 +131,9 @@ public class PersonaDao {
             ps.close();
             cn.closeConexion();
             return filasAfectadas > 0;
-
         } catch (SQLException e) {
             System.out.println(e.getMessage());
             return false;
         }
     }
-
 }
