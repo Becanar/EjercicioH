@@ -21,7 +21,7 @@ import java.io.*;
 import java.util.ArrayList;
 
 /**
- * Controlador para la gestión de una tabla que contiene información de personas. Permite agregar, modificar, eliminar,
+ * Controlador para la gestión de una tabla que contiene información de personas. Permite agregar, modificarPersona, eliminarPersona,
  * importar y exportar datos de personas en formato CSV.
  */
 public class tablaController {
@@ -95,7 +95,7 @@ public class tablaController {
     }
 
     /**
-     * Muestra una ventana modal para agregar o modificar datos de una persona.
+     * Muestra una ventana modal para agregar o modificarPersona datos de una persona.
      * @param ventanaPrincipal La ventana principal desde donde se abre el modal.
      * @param esModif Booleano que indica si se trata de una modificación (true) o un nuevo registro (false).
      */
