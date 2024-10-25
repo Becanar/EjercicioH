@@ -5,9 +5,10 @@ package com.example.ejercicioh.model;
  * Esta clase se utiliza para almacenar la información básica de una persona.
  */
 public class Persona {
-    private String nombre; // Cambiado a String
-    private String apellidos; // Cambiado a String
-    private int edad; // Cambiado a int
+    private int id;
+    private String nombre;
+    private String apellidos;
+    private int edad;
 
     /**
      * Constructor de la clase Persona.
