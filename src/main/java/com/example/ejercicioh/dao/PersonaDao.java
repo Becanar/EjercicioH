@@ -13,8 +13,7 @@ public class PersonaDao {
 
     public static ObservableList<Persona> cargarPersonas() {
         ConectorDB cn;
-        ObservableList<Persona> listadoDePersonas= FXCollections.observableArrayList();
-
+        ObservableList<Persona> lst = FXCollections.observableArrayList();
         try{
             cn = new ConectorDB();
 
@@ -26,8 +25,8 @@ public class PersonaDao {
                 String nombre = rs.getString("nombre");
                 String apellidos = rs.getString("apellidos");
                 int edad = rs.getInt("edad");
-                Persona mp = new Persona(id,nombre,apellidos,edad);
-                listadoDePersonas.add(mp);
+                Persona p = new Persona(id,nombre,apellidos,edad);
+                lst.add(p);
 
             }
             rs.close();
@@ -36,10 +35,10 @@ public class PersonaDao {
                 SQLException e) {
             System.out.println(e.getMessage());
         }
-        return listadoDePersonas;
+        return lst;
     }
 
-    public static boolean modificarPersona(Persona p, Persona pNueva) {
+    public static boolean modificarPersona(Persona p, Persona pN) {
         ConectorDB cn;
         PreparedStatement ps;
 
@@ -49,9 +48,9 @@ public class PersonaDao {
             String consulta = "UPDATE Persona SET nombre = ?,apellidos = ?,edad = ? WHERE id = ?";
             ps = cn.getConnection().prepareStatement(consulta);
 
-            ps.setString(1, pNueva.getNombre());
-            ps.setString(2, pNueva.getApellidos());
-            ps.setInt(3, pNueva.getEdad());
+            ps.setString(1, pN.getNombre());
+            ps.setString(2, pN.getApellidos());
+            ps.setInt(3, pN.getEdad());
             ps.setInt(4, p.getId());
             int result = ps.executeUpdate();
             ps.close();
@@ -65,27 +64,20 @@ public class PersonaDao {
 
     }
 
-    public  static int insertarPersona(Persona persona) {
+    public  static int insertarPersona(Persona p) {
         ConectorDB cn;
         PreparedStatement ps;
 
         try {
             cn = new ConectorDB();
+            String sql = "INSERT INTO Persona (nombre,apellidos,edad) VALUES (?,?,?) ";
+            ps = cn.getConnection().prepareStatement(sql, PreparedStatement.RETURN_GENERATED_KEYS);
+            ps.setString(1, p.getNombre());
+            ps.setString(2, p.getApellidos());
+            ps.setInt(3, p.getEdad());
 
-
-            String consulta = "INSERT INTO Persona (nombre,apellidos,edad) VALUES (?,?,?) ";
-            ps = cn.getConnection().prepareStatement(consulta, PreparedStatement.RETURN_GENERATED_KEYS);
-
-            ps.setString(1, persona.getNombre());
-            ps.setString(2, persona.getApellidos());
-            ps.setInt(3, persona.getEdad());
-
-            int filasAfectadas = ps.executeUpdate();
-            //if (pstmt != null)
-
-            //if (cn != null)
-            System.out.println("Nueva entrada en  persona");
-            if (filasAfectadas > 0) {
+            int result = ps.executeUpdate();
+            if (result > 0) {
                 ResultSet rs = ps.getGeneratedKeys();
                 if (rs.next()) {
                     int id = rs.getInt(1);
@@ -98,9 +90,6 @@ public class PersonaDao {
             cn.closeConexion();
             return -1;
         } catch (SQLException e) {
-               /* Alertas alertaError = new Alertas();
-                alertaError.mostrarError("No he podido cargar el listado de dnis");
-                alertaError.mostrarError(e.getMessage());*/
             System.out.println(e.getMessage());
             return -1;
 
@@ -108,27 +97,21 @@ public class PersonaDao {
 
     }
 
-    public  static boolean eliminarPersona(Persona personaAEliminar){
+    public  static boolean eliminarPersona(Persona p){
 
         ConectorDB cn;
         PreparedStatement ps;
         try {
             cn = new ConectorDB();
-            //DELETE FROM `DNI`.`dni` WHERE (`dni` = 'asdasd');
-            String consulta = "DELETE FROM Persona WHERE (id = ?)";
-            ps = cn.getConnection().prepareStatement(consulta);
-            ps.setInt(1, personaAEliminar.getId());
+            String sql = "DELETE FROM Persona WHERE (id = ?)";
+            ps = cn.getConnection().prepareStatement(sql);
+            ps.setInt(1, p.getId());
             int filasAfectadas = ps.executeUpdate();
             ps.close();
             cn.closeConexion();
-            System.out.println("Eliminado con éxito");
             return filasAfectadas > 0;
 
         } catch (SQLException e) {
-                /*
-                Alertas alertaError = new Alertas();
-                alertaError.mostrarError("No he podido borrar ese registro");
-                alertaError.mostrarError(e.getMessage());*/
             System.out.println(e.getMessage());
             return false;
         }

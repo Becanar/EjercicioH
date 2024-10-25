@@ -52,7 +52,7 @@ public class tablaController {
         columnaApellidos.setCellValueFactory(cellData -> new ReadOnlyObjectWrapper<>(cellData.getValue().getApellidos()));
         columnaEdad.setCellValueFactory(cellData -> new ReadOnlyObjectWrapper<>(cellData.getValue().getEdad()));
 
-        personas = PersonaDao.cargarPersonas(); // Carga inicial desde la base de datos
+        personas = PersonaDao.cargarPersonas();
         filtro = new FilteredList<>(personas);
         tablaVista.setItems(filtro);
 
@@ -149,8 +149,8 @@ public class tablaController {
             } else {
                 int idGenerado = PersonaDao.insertarPersona(nuevaPersona);
                 if (idGenerado != -1) {
-                    nuevaPersona.setId(idGenerado); // Asignar el ID generado
-                    personas.add(nuevaPersona); // Agregar a la lista
+                    nuevaPersona.setId(idGenerado);
+                    personas.add(nuevaPersona);
                     mostrarVentanaAgregado();
                 }
             }
