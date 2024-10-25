@@ -116,7 +116,25 @@ public class tablaController {
             String apellidos = txtApellidos.getText();
             int edad = Integer.parseInt(txtEdad.getText());
 
-            Persona nuevaPersona = new Persona(nombre, apellidos, edad); // Crear nueva persona sin ID
+            Persona nuevaPersona = new Persona(nombre, apellidos, edad);
+
+            boolean existe = false;
+            for (Persona persona : personas) {
+                if (persona.equals(nuevaPersona)) {
+                    if (esModificar && persona.equals(tablaVista.getSelectionModel().getSelectedItem())) {
+                        continue;
+                    }
+                    existe = true;
+                    break;
+                }
+            }
+
+            if (existe) {
+                ArrayList<String> errores = new ArrayList<>();
+                errores.add("La persona ya existe.");
+                mostrarAlertError(errores);
+                return;
+            }
             if (esModificar) {
                 Persona personaSeleccionada = tablaVista.getSelectionModel().getSelectedItem();
                 Persona personaModificada = new Persona(personaSeleccionada.getId(), nombre, apellidos, edad);
